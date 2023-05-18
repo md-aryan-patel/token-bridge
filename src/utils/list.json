@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Sepolia ETH",
+    "ChainId": "11155111"
+  },
+  {
+    "name": "Mumbai Testnet",
+    "ChainId": "80001"
+  }
+]
