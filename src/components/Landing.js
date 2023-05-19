@@ -1,11 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { BsCaretUp, BsCaretDown } from "react-icons/bs";
 import { IoIosWallet } from "react-icons/io";
+import { ApplicationContext } from "../context/ApplicationContext";
 import list from "../utils/tokenlist.json";
 
 const Landing = () => {
+  const { currentAccount, getEtherBalance, getBtcBalance, burnEth, burnBtc } =
+    useContext(ApplicationContext);
   const [isOpen, setIsOpen] = useState(true);
-  const [options, setOptions] = useState(list[0].name);
+  const [tokenAmount, setTokenAmount] = useState(0);
+  const [tokenBalance, setTokenBalance] = useState(0.0);
+  const [options, setOptions] = useState("Select token");
+  const inputRef = useRef(tokenAmount);
+
+  useEffect(() => {
+    if (options === list[0].name) {
+      getBalance(1);
+    } else getBalance(2);
+  }, [options]);
+
+  const swap = async () => {
+    if (tokenAmount === 0) return alert("Amount can't be 0");
+    if (options === list[0].name) {
+      burnEth(currentAccount, tokenAmount);
+    } else {
+      burnBtc(currentAccount, tokenAmount);
+    }
+  };
+
+  const getBalance = async (num) => {
+    let result;
+    if (num === 1) {
+      result = await getEtherBalance();
+      setTokenBalance(result);
+    } else {
+      result = await getBtcBalance();
+      setTokenBalance(result);
+    }
+  };
+
+  const setCount = (e) => {
+    e.preventDefault();
+    setTokenAmount(parseInt(inputRef.current.value));
+  };
 
   return (
     <div className="p-4 mx-auto mt-16 mb-[86px] flex flex-col h-screen gap-4 w-full items-center justify-center">
@@ -13,7 +50,9 @@ const Landing = () => {
         <div className="flex flex-row w-full h-fit">
           <input
             type="number"
+            ref={inputRef}
             min={0}
+            onChange={setCount}
             placeholder={0}
             className="appearance-none::-webkit-inner-spin-button border-none bg-transparent placeholder:text-xl font-bold text-white text-xl p-2 m-1 rounded-md focus:outline-none focus:ring-0"
           ></input>
@@ -47,11 +86,14 @@ const Landing = () => {
           <div></div>
           <div className="flex flex-row ml-3 text-gray-400/70 text-lg font-bold">
             <IoIosWallet className="mt-0.5 mr-3 text-2xl" />
-            <div>0.00</div>
+            <div>{tokenBalance}</div>
           </div>
         </div>
       </div>
-      <div className="flex w-fit h-fit rounded-lg py-2 px-52 bg-blue-500/60 hover:bg-blue-500/70 hover:text-white cursor-pointer text-slate-300 text-xl font-bold">
+      <div
+        onClick={swap}
+        className="flex w-fit h-fit rounded-lg py-2 px-52 bg-blue-500/60 hover:bg-blue-500/70 hover:text-white cursor-pointer text-slate-300 text-xl font-bold"
+      >
         Swap
       </div>
     </div>
